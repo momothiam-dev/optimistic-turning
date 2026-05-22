@@ -5,7 +5,7 @@ import * as tf from '@tensorflow/tfjs';
 // Configuration
 // ---------------------------------------------------------------------------
 // URL du modèle TF.js (à placer dans le dossier public/model/)
-const MODEL_URL = '/model/model.json';
+const MODEL_URL = '/model/4x/model.json';
 
 // ---------------------------------------------------------------------------
 // UI Elements
