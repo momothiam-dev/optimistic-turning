@@ -1,11 +1,5 @@
 // src/main.js
-import * as tf from '@tensorflow/tfjs';
-
-// ---------------------------------------------------------------------------
-// Configuration
-// ---------------------------------------------------------------------------
-// URL du modèle TF.js (à placer dans le dossier public/model/)
-const MODEL_URL = '/model/4x/model.json';
+// UpscalerJS implementation – loads model from CDN, no tf import needed.
 
 // ---------------------------------------------------------------------------
 // UI Elements
@@ -17,56 +11,34 @@ const resultCanvas = document.getElementById('result-canvas');
 const downloadBtn = document.getElementById('download-btn');
 
 // ---------------------------------------------------------------------------
-// Load model (cached after first call)
+// UpscalerJS loader (CDN version)
 // ---------------------------------------------------------------------------
-let modelPromise = null;
-function loadModel() {
-  if (!modelPromise) {
-    console.log('Loading upscaling model…');
-    modelPromise = tf.loadGraphModel(MODEL_URL);
+let upscaler = null;
+async function loadUpscaler() {
+  if (!upscaler) {
+    console.log('Loading UpscalerJS Real‑ESRGAN model…');
+    // `Upscaler` is provided by the script tag added to index.html.
+    upscaler = new Upscaler({
+      model: 'esrgan-legacy', // 4× upscaler, FP16, works on WebGL/WebGPU
+      scale: 4,
+    });
+    await upscaler.ready;
   }
-  return modelPromise;
+  return upscaler;
 }
 
 // ---------------------------------------------------------------------------
-// Helpers – image ↔ tensor
-// ---------------------------------------------------------------------------
-function imageToTensor(img) {
-  const tensor = tf.browser.fromPixels(img).toFloat().div(tf.scalar(255));
-  return tensor.expandDims(0); // shape [1, h, w, 3]
-}
-
-async function tensorToCanvas(tensor) {
-  const [batch, h, w, c] = tensor.shape;
-  const imgTensor = tensor.squeeze().mul(tf.scalar(255)).clipByValue(0, 255).cast('int32');
-  const data = await imgTensor.data();
-  const imageData = new ImageData(w, h);
-  for (let i = 0; i < data.length; i++) {
-    imageData.data[i] = data[i];
-  }
-  const ctx = resultCanvas.getContext('2d');
-  resultCanvas.width = w;
-  resultCanvas.height = h;
-  ctx.putImageData(imageData, 0, 0);
-}
-
-// ---------------------------------------------------------------------------
-// Core upscaling flow
+// Core upscaling flow using UpscalerJS
 // ---------------------------------------------------------------------------
 async function upscaleImage(file) {
-  const model = await loadModel();
-
-  const img = new Image();
-  const url = URL.createObjectURL(file);
-  img.src = url;
-  await img.decode();
-  URL.revokeObjectURL(url);
-
-  const inputTensor = imageToTensor(img);
-  // model.executeAsync returns a tensor (or array of tensors)
-  const outputTensor = await model.executeAsync(inputTensor);
-
-  await tensorToCanvas(outputTensor);
+  const up = await loadUpscaler();
+  // UpscalerJS handles image decoding, tiling and conversion internally.
+  const upscaledCanvas = await up.upscale(file);
+  // Draw the result onto the existing result canvas.
+  const ctx = resultCanvas.getContext('2d');
+  resultCanvas.width = upscaledCanvas.width;
+  resultCanvas.height = upscaledCanvas.height;
+  ctx.drawImage(upscaledCanvas, 0, 0);
   resultSection.classList.remove('hidden');
 
   downloadBtn.onclick = () => {
