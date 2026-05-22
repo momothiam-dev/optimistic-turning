@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amélioration d'Image UHD/4K</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1 class="title">Amélioration d'Image UHD/4K</h1>
+    <section id="upload-section" class="card glass">
+      <input type="file" id="file-input" accept="image/*" hidden />
+      <label for="file-input" class="upload-area">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p>Glissez‑déposez une image ou cliquez pour sélectionner</p>
+      </label>
+    </section>
+    <section id="result-section" class="card glass hidden">
+      <h2 class="subtitle">Résultat</h2>
+      <canvas id="result-canvas"></canvas>
+      <button id="download-btn" class="btn">Télécharger l'image améliorée</button>
+    </section>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
