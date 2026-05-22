@@ -32,15 +32,25 @@ async function loadUpscaler() {
 // ---------------------------------------------------------------------------
 async function upscaleImage(file) {
   const up = await loadUpscaler();
-  // UpscalerJS handles image decoding, tiling and conversion internally.
-  const upscaledCanvas = await up.upscale(file);
+  // Create an Image element from the uploaded file
+  const img = new Image();
+  const objectUrl = URL.createObjectURL(file);
+  img.src = objectUrl;
+  await new Promise((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = (e) => reject(e);
+  });
+  // UpscalerJS can now process the Image element
+  const upscaledCanvas = await up.upscale(img);
+  // Clean up the object URL
+  URL.revokeObjectURL(objectUrl);
   // Draw the result onto the existing result canvas.
   const ctx = resultCanvas.getContext('2d');
   resultCanvas.width = upscaledCanvas.width;
   resultCanvas.height = upscaledCanvas.height;
   ctx.drawImage(upscaledCanvas, 0, 0);
+  resultCanvas.style.display = 'block';
   resultSection.classList.remove('hidden');
-
   downloadBtn.onclick = () => {
     resultCanvas.toBlob((blob) => {
       const link = document.createElement('a');
