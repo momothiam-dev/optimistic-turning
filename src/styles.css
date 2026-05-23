@@ -1,10 +1,10 @@
 /* src/styles.css */
 :root {
   --font-main: 'Inter', sans-serif;
-  --bg-dark: #0a0a0a;
-  --bg-card: rgba(255, 255, 255, 0.08);
-  --gradient-primary: linear-gradient(135deg, #00b4db, #0083b0);
-  --accent: #00e5ff;
+  --bg-dark: #f5f5f5;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --gradient-primary: linear-gradient(135deg, #ff7e5f, #feb47b);
+  --accent: #ff6b6b;
 }
 
 * {
@@ -16,7 +16,7 @@
 
 body {
   background: var(--bg-dark);
-  color: #fff;
+  color: #222;
   min-height: 100vh;
   display: flex;
   align-items: center;
