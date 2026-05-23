@@ -25,6 +25,69 @@
       <button id="download-btn" class="btn">Télécharger l'image améliorée</button>
     </section>
   </main>
-  <script src="src/main.js"></script>
+  <script type="module">
+// src/main.js
+// UpscalerJS implementation – loads model from CDN, no tf import needed.
+
+// UI Elements
+const fileInput = document.getElementById('file-input');
+const uploadSection = document.getElementById('upload-section');
+const resultSection = document.getElementById('result-section');
+const resultCanvas = document.getElementById('result-canvas');
+const downloadBtn = document.getElementById('download-btn');
+
+let upscaler = null;
+async function loadUpscaler() {
+  if (!upscaler) {
+    console.log('Loading UpscalerJS Real‑ESRGAN model…');
+    upscaler = new Upscaler({
+      model: 'esrgan-legacy',
+      scale: 4,
+    });
+    await upscaler.ready;
+  }
+  return upscaler;
+}
+
+async function upscaleImage(file) {
+  const up = await loadUpscaler();
+  const img = new Image();
+  const objectUrl = URL.createObjectURL(file);
+  img.src = objectUrl;
+  await new Promise((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = (e) => reject(e);
+  });
+  const upscaledCanvas = await up.upscale(img);
+  URL.revokeObjectURL(objectUrl);
+  const ctx = resultCanvas.getContext('2d');
+  resultCanvas.width = upscaledCanvas.width;
+  resultCanvas.height = upscaledCanvas.height;
+  ctx.drawImage(upscaledCanvas, 0, 0);
+  resultCanvas.style.display = 'block';
+  resultSection.classList.remove('hidden');
+  downloadBtn.onclick = () => {
+    resultCanvas.toBlob((blob) => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `upscaled_${file.name}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }, 'image/png');
+  };
+}
+
+uploadSection.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    await upscaleImage(file);
+  } catch (err) {
+    console.error(err);
+    alert('Erreur pendant le traitement de l\'image. Consultez la console pour plus de détails.');
+  }
+});
+</script>
 </body>
 </html>
